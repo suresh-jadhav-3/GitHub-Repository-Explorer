@@ -97,7 +97,7 @@ const App = () => {
       )}
 
       <footer className="text-center mt-10">
-        <p className="text-gray-600">© 2023 GitHub Repository Explorer</p>
+        <p className="text-gray-600">© 2024 Suresh Jadhav</p>
       </footer>
     </div>
   );
