@@ -21,7 +21,7 @@ const App = () => {
       if (page === 1) {
         setRepositories(result.data.items); 
       } else {
-        setRepositories((prevRepos) => [...prevRepos, ...result.data.items]); 
+        setRepositories(() => [ ...result.data.items]); 
       }
     } catch (error) {
       setError('Error fetching repositories');
