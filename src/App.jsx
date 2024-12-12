@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const App = () => {
-
   const [query, setQuery] = useState('');
   const [repositories, setRepositories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
+  useEffect(() => {
+    if (query) {
+      setRepositories([]); 
+      setCurrentPage(1); 
+    }
+  }, [query]);
 
   const fetchRepositories = async (page = 1) => {
     if (!query) return;
@@ -21,7 +27,7 @@ const App = () => {
       if (page === 1) {
         setRepositories(result.data.items); 
       } else {
-        setRepositories(() => [ ...result.data.items]); 
+        setRepositories((prevRepos) => [ ...prevRepos, ...result.data.items]); 
       }
     } catch (error) {
       setError('Error fetching repositories');
@@ -29,6 +35,18 @@ const App = () => {
     } finally {
       setLoading(false);
     }
+    
+  };
+
+  useEffect(() => {
+    if (currentPage > 1) {
+      fetchRepositories(currentPage);
+    }
+  }, [currentPage]);
+
+  const handleSearch = () => {
+    setCurrentPage(1); 
+    fetchRepositories(); 
   };
 
   return (
@@ -43,12 +61,11 @@ const App = () => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            
             className="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
             placeholder="Search GitHub Repositories..."
           />
           <button
-            onClick={fetchRepositories}
+            onClick={handleSearch}
             className="ml-4 p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 shadow-md hover:shadow-lg"
           >
             Search
@@ -64,14 +81,14 @@ const App = () => {
               <div className='flex gap-4 items-center'>
                 <img src={repo.owner.avatar_url} alt={`${repo.owner.login}'s avatar`} className="w-12 h-12 rounded-full" />
                 <h1 className="text-gray-600 text-xl font-semibold">
-                  <a href={repo.owner.html_url}  target="_blank" className="hover:underline">{repo.owner.login}</a>
+                  <a href={repo.owner.html_url} target="_blank" className="hover:underline">{repo.owner.login}</a>
                 </h1>
               </div>
               <h3 className="text-xl font-semibold text-blue-600 mt-2">
-                <a href={repo.html_url} target="_blank"  className="hover:underline">{repo.name}</a>
+                <a href={repo.html_url} target="_blank" className="hover:underline">{repo.name}</a>
               </h3>
               <p className="mt-2 text-gray-700 overflow-x-clip ">{repo.description || 'No description available'}</p>
-              <div className="mt-4 text-sm text-gray-600">
+              < div className="mt-4 text-sm text-gray-600">
                 <p><strong>Stars:</strong> {repo.stargazers_count}</p>
                 <p><strong>Forks:</strong> {repo.forks_count}</p>
                 <p><strong>Open Issues:</strong> {repo.open_issues_count}</p>
@@ -84,21 +101,13 @@ const App = () => {
       {repositories.length > 0 && !loading && (
         <div className="text-center mt-6">
           <button
-            onClick={() => {
-              const nextPage = currentPage + 1;
-              setCurrentPage(nextPage);
-              fetchRepositories(nextPage);
-            }}
-            className="p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
+            onClick={() => setCurrentPage((prevPage) => prevPage + 1)}
+            className="p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 shadow-md hover:shadow-lg"
           >
             Load More
           </button>
         </div>
       )}
-
-      <footer className="text-center mt-10">
-        <p className="text-gray-600">© 2024 Suresh Jadhav</p>
-      </footer>
     </div>
   );
 };
